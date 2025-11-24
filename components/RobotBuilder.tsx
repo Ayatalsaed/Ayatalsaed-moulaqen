@@ -12,7 +12,9 @@ import {
   Save, 
   Box, 
   Disc,
-  Settings2
+  Settings2,
+  Radar,
+  Crosshair
 } from 'lucide-react';
 import { RobotConfig, SensorType } from '../types';
 
@@ -62,6 +64,22 @@ const SENSORS: { id: SensorType; name: string; desc: string; icon: any; power: n
     icon: Video, 
     power: 15, 
     weight: 25 
+  },
+  { 
+    id: 'lidar', 
+    name: 'LiDAR ماسح ضوئي', 
+    desc: 'لرسم الخرائط وبناء بيئة ثلاثية الأبعاد (SLAM).', 
+    icon: Radar, 
+    power: 45, 
+    weight: 160 
+  },
+  { 
+    id: 'imu', 
+    name: 'وحدة قياس بالقصور الذاتي (IMU)', 
+    desc: 'دقة عالية في التسارع والتوجيه.', 
+    icon: Crosshair, 
+    power: 8, 
+    weight: 5 
   }
 ];
 
@@ -80,6 +98,8 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
         if (id === 'color' && !newSensorConfig.color) newSensorConfig.color = { illumination: true };
         if (id === 'gyro' && !newSensorConfig.gyro) newSensorConfig.gyro = { axis: '3-axis' };
         if (id === 'camera' && !newSensorConfig.camera) newSensorConfig.camera = { resolution: '720p' };
+        if (id === 'lidar' && !newSensorConfig.lidar) newSensorConfig.lidar = { range: 8, sampleRate: 4000 };
+        if (id === 'imu' && !newSensorConfig.imu) newSensorConfig.imu = { accelRange: '4g', gyroRange: '500dps' };
     }
 
     setConfig({ ...config, sensors: newSensors, sensorConfig: newSensorConfig });
@@ -184,6 +204,12 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
                       <Wifi size={16} className="text-indigo-400" />
                     </div>
                   )}
+
+                  {config.sensors.includes('lidar') && (
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-red-500/20 border border-red-500 p-2 rounded-full z-10 animate-pulse" title="LiDAR">
+                      <Radar size={20} className="text-red-400" />
+                    </div>
+                  )}
                   
                   {config.sensors.includes('infrared') && (
                     <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
@@ -196,6 +222,12 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
                   {config.sensors.includes('color') && (
                     <div className="absolute top-1/2 -right-6 -translate-y-1/2 bg-amber-500/20 border border-amber-500 p-1.5 rounded-lg">
                       <Eye size={16} className="text-amber-400" />
+                    </div>
+                  )}
+
+                  {config.sensors.includes('imu') && (
+                    <div className="absolute bottom-2 right-2 bg-blue-500/20 border border-blue-500 p-1 rounded" title="IMU">
+                      <Crosshair size={12} className="text-blue-400" />
                     </div>
                   )}
                </div>
@@ -352,6 +384,78 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
                                  </div>
                              )}
 
+                             {sensor.id === 'lidar' && (
+                                <div>
+                                    <div className="mb-3">
+                                      <div className="flex justify-between text-xs text-slate-400 mb-1">
+                                          <span>مدى المسح (متر)</span>
+                                          <span>{config.sensorConfig.lidar?.range || 8} م</span>
+                                      </div>
+                                      <input 
+                                          type="range" 
+                                          min="4" max="20" step="1"
+                                          value={config.sensorConfig.lidar?.range || 8}
+                                          onChange={(e) => updateSensorConfig('lidar', 'range', parseInt(e.target.value))}
+                                          className="w-full h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                                      />
+                                    </div>
+                                    <div>
+                                      <div className="flex justify-between text-xs text-slate-400 mb-1">
+                                          <span>معدل العينات (Hz)</span>
+                                          <span>{config.sensorConfig.lidar?.sampleRate || 4000} Hz</span>
+                                      </div>
+                                      <input 
+                                          type="range" 
+                                          min="2000" max="8000" step="1000"
+                                          value={config.sensorConfig.lidar?.sampleRate || 4000}
+                                          onChange={(e) => updateSensorConfig('lidar', 'sampleRate', parseInt(e.target.value))}
+                                          className="w-full h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                                      />
+                                    </div>
+                                </div>
+                             )}
+
+                             {sensor.id === 'imu' && (
+                                 <div className="space-y-3">
+                                     <div>
+                                       <span className="text-xs text-slate-400 block mb-1">مدى التسارع (Accelerometer)</span>
+                                       <div className="flex gap-1">
+                                         {['2g', '4g', '8g'].map((range) => (
+                                             <button
+                                                key={range}
+                                                onClick={() => updateSensorConfig('imu', 'accelRange', range)}
+                                                className={`flex-1 py-1 text-xs rounded border transition-colors ${
+                                                    config.sensorConfig.imu?.accelRange === range
+                                                    ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' 
+                                                    : 'bg-slate-800 border-slate-600 text-slate-400'
+                                                }`}
+                                             >
+                                                 {range}
+                                             </button>
+                                         ))}
+                                       </div>
+                                     </div>
+                                     <div>
+                                       <span className="text-xs text-slate-400 block mb-1">مدى الجيروسكوب (Gyroscope)</span>
+                                       <div className="flex gap-1">
+                                         {['250dps', '500dps'].map((range) => (
+                                             <button
+                                                key={range}
+                                                onClick={() => updateSensorConfig('imu', 'gyroRange', range)}
+                                                className={`flex-1 py-1 text-xs rounded border transition-colors ${
+                                                    config.sensorConfig.imu?.gyroRange === range
+                                                    ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' 
+                                                    : 'bg-slate-800 border-slate-600 text-slate-400'
+                                                }`}
+                                             >
+                                                 {range}
+                                             </button>
+                                         ))}
+                                       </div>
+                                     </div>
+                                 </div>
+                             )}
+
                         </div>
                     )}
 
@@ -373,7 +477,7 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
                <div>
                  <h4 className="font-bold text-indigo-200 text-sm">نصيحة المعلم الذكي</h4>
                  <p className="text-xs text-indigo-300/80 mt-1">
-                   إضافة الكاميرا تستهلك طاقة عالية. إذا كانت مهمتك تعتمد فقط على تتبع الخط، فإن الحساسات تحت الحمراء (IR) أكثر كفاءة وتوفر استجابة أسرع.
+                   إضافة الكاميرا أو LiDAR تستهلك طاقة عالية وتزيد وزن الروبوت، مما قد يؤثر على سرعة الحركة. إذا كانت مهمتك بسيطة، اكتفِ بالحساسات الأساسية.
                  </p>
                </div>
             </div>

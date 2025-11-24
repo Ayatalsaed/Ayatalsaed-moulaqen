@@ -10,7 +10,7 @@ interface SimulationViewportProps {
 const SimulationViewport: React.FC<SimulationViewportProps> = ({ isRunning, codeOutput, resetSimulation }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const robotState = useRef({ x: 50, y: 50, angle: 0 }); // Grid coordinates
-  const animationFrameId = useRef<number>();
+  const animationFrameId = useRef<number>(0);
 
   // Draw the grid and robot
   const draw = (ctx: CanvasRenderingContext2D, width: number, height: number) => {

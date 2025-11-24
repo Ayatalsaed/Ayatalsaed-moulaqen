@@ -43,7 +43,9 @@ export default function App() {
       infrared: { sensitivity: 50 },
       color: { illumination: true },
       gyro: { axis: '3-axis' },
-      camera: { resolution: '720p' }
+      camera: { resolution: '720p' },
+      lidar: { range: 8, sampleRate: 4000 },
+      imu: { accelRange: '4g', gyroRange: '500dps' }
     },
     color: '#10b981'
   });

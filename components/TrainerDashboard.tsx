@@ -1,6 +1,9 @@
 import React from 'react';
 import { Users, FileText, TrendingUp, AlertCircle, Plus, Search, MoreVertical, CheckCircle, Clock } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line,
+  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis
+} from 'recharts';
 
 const STUDENTS_DATA = [
   { id: 1, name: 'أحمد محمد', progress: 85, status: 'Active', lastActive: '2 min ago', avatar: 'AM' },
@@ -23,6 +26,15 @@ const PERFORMANCE_DATA = [
   { name: 'Week 4', avg: 85 },
   { name: 'Week 5', avg: 82 },
   { name: 'Week 6', avg: 90 },
+];
+
+const SKILLS_DATA = [
+  { subject: 'المنطق', A: 85, fullMark: 100 },
+  { subject: 'الحساسات', A: 70, fullMark: 100 },
+  { subject: 'الكفاءة', A: 90, fullMark: 100 },
+  { subject: 'التعاون', A: 65, fullMark: 100 },
+  { subject: 'الإبداع', A: 80, fullMark: 100 },
+  { subject: 'التصحيح', A: 75, fullMark: 100 },
 ];
 
 const TrainerDashboard: React.FC = () => {
@@ -138,19 +150,35 @@ const TrainerDashboard: React.FC = () => {
            {/* Performance Chart */}
            <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6">
               <h3 className="text-lg font-bold text-white mb-4">تحليل الأداء العام</h3>
-              <div className="h-48">
+              <div className="h-40">
                  <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={PERFORMANCE_DATA}>
                        <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                       <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 10 }} axisLine={false} tickLine={false} />
+                       <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 10 }} axisLine={false} tickLine={false} hide />
                        <YAxis tick={{ fill: '#94a3b8', fontSize: 10 }} axisLine={false} tickLine={false} domain={[0, 100]} />
                        <Tooltip 
-                          contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc' }}
+                          contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc', fontSize: '12px' }}
                           itemStyle={{ color: '#10b981' }}
                        />
                        <Line type="monotone" dataKey="avg" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981' }} activeDot={{ r: 6 }} />
                     </LineChart>
                  </ResponsiveContainer>
+              </div>
+           </div>
+
+           {/* Skills Radar Chart (New) */}
+           <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 relative overflow-hidden">
+              <h3 className="text-lg font-bold text-white mb-4">متوسط مهارات الفصل</h3>
+              <div className="h-48">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart cx="50%" cy="50%" outerRadius="70%" data={SKILLS_DATA}>
+                    <PolarGrid stroke="#334155" />
+                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10 }} />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                    <Radar name="Class Avg" dataKey="A" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} />
+                    <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', fontSize: '12px' }} />
+                  </RadarChart>
+                </ResponsiveContainer>
               </div>
            </div>
 

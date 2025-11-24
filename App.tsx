@@ -38,6 +38,13 @@ export default function App() {
     name: 'المستكشف 1',
     type: 'rover',
     sensors: ['ultrasonic'],
+    sensorConfig: {
+      ultrasonic: { range: 200 },
+      infrared: { sensitivity: 50 },
+      color: { illumination: true },
+      gyro: { axis: '3-axis' },
+      camera: { resolution: '720p' }
+    },
     color: '#10b981'
   });
 

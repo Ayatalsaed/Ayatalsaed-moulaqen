@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Wifi, 
@@ -10,7 +11,8 @@ import {
   Scale, 
   Save, 
   Box, 
-  Disc
+  Disc,
+  Settings2
 } from 'lucide-react';
 import { RobotConfig, SensorType } from '../types';
 
@@ -69,7 +71,31 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
     const newSensors = config.sensors.includes(id)
       ? config.sensors.filter(s => s !== id)
       : [...config.sensors, id];
-    setConfig({ ...config, sensors: newSensors });
+    
+    // Initialize default config if not present when selecting
+    let newSensorConfig = { ...config.sensorConfig };
+    if (!config.sensors.includes(id)) {
+        if (id === 'ultrasonic' && !newSensorConfig.ultrasonic) newSensorConfig.ultrasonic = { range: 200 };
+        if (id === 'infrared' && !newSensorConfig.infrared) newSensorConfig.infrared = { sensitivity: 50 };
+        if (id === 'color' && !newSensorConfig.color) newSensorConfig.color = { illumination: true };
+        if (id === 'gyro' && !newSensorConfig.gyro) newSensorConfig.gyro = { axis: '3-axis' };
+        if (id === 'camera' && !newSensorConfig.camera) newSensorConfig.camera = { resolution: '720p' };
+    }
+
+    setConfig({ ...config, sensors: newSensors, sensorConfig: newSensorConfig });
+  };
+
+  const updateSensorConfig = (id: SensorType, key: string, value: any) => {
+    setConfig({
+        ...config,
+        sensorConfig: {
+            ...config.sensorConfig,
+            [id]: {
+                ...config.sensorConfig[id as keyof typeof config.sensorConfig],
+                [key]: value
+            }
+        }
+    });
   };
 
   // Calculate stats
@@ -212,14 +238,13 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
                 return (
                   <div 
                     key={sensor.id}
-                    onClick={() => toggleSensor(sensor.id)}
-                    className={`relative group cursor-pointer p-5 rounded-2xl border-2 transition-all duration-200 ${
+                    className={`relative p-5 rounded-2xl border-2 transition-all duration-200 ${
                       isSelected 
                         ? 'bg-slate-800 border-emerald-500 shadow-lg shadow-emerald-900/20' 
                         : 'bg-slate-900 border-slate-700 hover:border-slate-600'
                     }`}
                   >
-                    <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-start justify-between mb-3 cursor-pointer" onClick={() => toggleSensor(sensor.id)}>
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
                         isSelected ? 'bg-emerald-500 text-white' : 'bg-slate-800 text-slate-400'
                       }`}>
@@ -232,14 +257,105 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
                       </div>
                     </div>
                     
-                    <h4 className={`text-lg font-bold mb-1 ${isSelected ? 'text-white' : 'text-slate-300'}`}>
+                    <h4 className={`text-lg font-bold mb-1 cursor-pointer ${isSelected ? 'text-white' : 'text-slate-300'}`} onClick={() => toggleSensor(sensor.id)}>
                       {sensor.name}
                     </h4>
-                    <p className="text-sm text-slate-400 mb-4 leading-relaxed">
+                    <p className="text-sm text-slate-400 mb-4 leading-relaxed cursor-pointer" onClick={() => toggleSensor(sensor.id)}>
                       {sensor.desc}
                     </p>
 
-                    <div className="flex items-center gap-3 text-xs font-mono border-t border-slate-700/50 pt-3">
+                    {/* Sensor Specific Configurations */}
+                    {isSelected && (
+                        <div className="mt-4 pt-4 border-t border-slate-700/50 animate-fadeIn">
+                             <div className="flex items-center gap-2 mb-3 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                                <Settings2 size={12} />
+                                إعدادات الحساس
+                             </div>
+                             
+                             {sensor.id === 'ultrasonic' && (
+                                <div>
+                                    <div className="flex justify-between text-xs text-slate-400 mb-1">
+                                        <span>أقصى مدى قياس</span>
+                                        <span>{config.sensorConfig.ultrasonic?.range || 200} سم</span>
+                                    </div>
+                                    <input 
+                                        type="range" 
+                                        min="50" max="400" step="10"
+                                        value={config.sensorConfig.ultrasonic?.range || 200}
+                                        onChange={(e) => updateSensorConfig('ultrasonic', 'range', parseInt(e.target.value))}
+                                        className="w-full h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                                    />
+                                </div>
+                             )}
+
+                             {sensor.id === 'infrared' && (
+                                <div>
+                                    <div className="flex justify-between text-xs text-slate-400 mb-1">
+                                        <span>حساسية الضوء</span>
+                                        <span>{config.sensorConfig.infrared?.sensitivity || 50}%</span>
+                                    </div>
+                                    <input 
+                                        type="range" 
+                                        min="0" max="100"
+                                        value={config.sensorConfig.infrared?.sensitivity || 50}
+                                        onChange={(e) => updateSensorConfig('infrared', 'sensitivity', parseInt(e.target.value))}
+                                        className="w-full h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                                    />
+                                </div>
+                             )}
+
+                             {sensor.id === 'color' && (
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-slate-300">تشغيل إضاءة LED مساعدة</span>
+                                    <button 
+                                        onClick={() => updateSensorConfig('color', 'illumination', !config.sensorConfig.color?.illumination)}
+                                        className={`w-10 h-5 rounded-full flex items-center p-1 transition-colors ${config.sensorConfig.color?.illumination ? 'bg-emerald-500' : 'bg-slate-600'}`}
+                                    >
+                                        <div className={`w-3 h-3 bg-white rounded-full transition-transform ${config.sensorConfig.color?.illumination ? 'translate-x-0' : '-translate-x-5'}`}></div>
+                                    </button>
+                                </div>
+                             )}
+
+                             {sensor.id === 'gyro' && (
+                                 <div className="flex gap-2">
+                                     {['3-axis', '6-axis'].map((axis) => (
+                                         <button
+                                            key={axis}
+                                            onClick={() => updateSensorConfig('gyro', 'axis', axis)}
+                                            className={`flex-1 py-1 text-xs rounded border transition-colors ${
+                                                config.sensorConfig.gyro?.axis === axis 
+                                                ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' 
+                                                : 'bg-slate-800 border-slate-600 text-slate-400'
+                                            }`}
+                                         >
+                                             {axis}
+                                         </button>
+                                     ))}
+                                 </div>
+                             )}
+
+                             {sensor.id === 'camera' && (
+                                 <div className="flex gap-2">
+                                     {['720p', '1080p'].map((res) => (
+                                         <button
+                                            key={res}
+                                            onClick={() => updateSensorConfig('camera', 'resolution', res)}
+                                            className={`flex-1 py-1 text-xs rounded border transition-colors ${
+                                                config.sensorConfig.camera?.resolution === res 
+                                                ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' 
+                                                : 'bg-slate-800 border-slate-600 text-slate-400'
+                                            }`}
+                                         >
+                                             {res}
+                                         </button>
+                                     ))}
+                                 </div>
+                             )}
+
+                        </div>
+                    )}
+
+                    <div className="flex items-center gap-3 text-xs font-mono border-t border-slate-700/50 pt-3 mt-4">
                       <span className="flex items-center gap-1 text-yellow-500/80">
                         <Zap size={12} /> {sensor.power}mA
                       </span>

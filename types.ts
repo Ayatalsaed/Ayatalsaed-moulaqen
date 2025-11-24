@@ -37,6 +37,13 @@ export interface RobotConfig {
   name: string;
   type: 'rover' | 'arm' | 'drone';
   sensors: SensorType[];
+  sensorConfig: {
+    ultrasonic?: { range: number };
+    infrared?: { sensitivity: number };
+    color?: { illumination: boolean };
+    gyro?: { axis: '3-axis' | '6-axis' };
+    camera?: { resolution: '720p' | '1080p' };
+  };
   color: string;
 }
 

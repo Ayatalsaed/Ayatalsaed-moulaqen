@@ -4,7 +4,8 @@ export enum View {
   DASHBOARD = 'DASHBOARD',
   EDITOR = 'EDITOR',
   SIMULATION = 'SIMULATION',
-  BUILDER = 'BUILDER'
+  BUILDER = 'BUILDER',
+  TRAINER_DASHBOARD = 'TRAINER_DASHBOARD'
 }
 
 export enum PublicView {

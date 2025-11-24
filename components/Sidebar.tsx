@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Code, Bot, Settings, Award, Layers } from 'lucide-react';
+import { LayoutDashboard, Code, Bot, Settings, Award, Layers, Users } from 'lucide-react';
 import { View } from '../types';
 
 interface SidebarProps {
@@ -13,6 +13,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView }) => {
     { id: View.EDITOR, label: 'المعمل البرمجي', icon: Code },
     { id: View.BUILDER, label: 'بناء الروبوت', icon: Bot },
     { id: View.SIMULATION, label: 'المحاكاة', icon: Layers },
+    { id: View.TRAINER_DASHBOARD, label: 'بوابة المدرب', icon: Users },
   ];
 
   return (

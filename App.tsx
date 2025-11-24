@@ -3,11 +3,13 @@ import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import CodeEditor from './components/CodeEditor';
 import SimulationViewport from './components/SimulationViewport';
+import Simulation3D from './components/Simulation3D';
 import BotChat from './components/BotChat';
 import RobotBuilder from './components/RobotBuilder';
 import LandingPage from './components/LandingPage';
+import TrainerDashboard from './components/TrainerDashboard';
 import { View, Challenge, RobotConfig } from './types';
-import { Bot, Cpu, Sliders } from 'lucide-react';
+import { Bot, Cpu, Sliders, Box, Layers } from 'lucide-react';
 
 const INITIAL_CODE = `# برمجة حركة الروبوت
 # المهمة: تحرك للأمام ثم انعطف لليمين
@@ -32,6 +34,7 @@ export default function App() {
   const [isRunning, setIsRunning] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
   const [simCommands, setSimCommands] = useState<any[]>([]);
+  const [is3DMode, setIs3DMode] = useState(false);
   
   const [robotConfig, setRobotConfig] = useState<RobotConfig>({
     name: 'المستكشف 1',
@@ -113,6 +116,9 @@ export default function App() {
       case View.DASHBOARD:
         return <Dashboard challenges={INITIAL_CHALLENGES} />;
       
+      case View.TRAINER_DASHBOARD:
+        return <TrainerDashboard />;
+
       case View.EDITOR:
       case View.SIMULATION:
         // Combined view for editing and simulation
@@ -131,16 +137,49 @@ export default function App() {
                </div>
             </div>
             <div className="h-full flex flex-col gap-4">
-                {/* Simulation Section */}
-                <div className="flex-1">
-                   <SimulationViewport 
-                      config={robotConfig}
-                      isRunning={isRunning} 
-                      codeOutput={simCommands} 
-                      resetSimulation={() => setSimCommands([])}
-                      startPosition={{ x: 100, y: 100, angle: 0 }}
-                   />
+                {/* Simulation Header with Toggle */}
+                <div className="flex items-center justify-between bg-slate-900 p-2 rounded-xl border border-slate-700">
+                   <h3 className="text-sm font-bold text-white px-2 flex items-center gap-2">
+                     {is3DMode ? <Box size={16} className="text-emerald-500" /> : <Layers size={16} className="text-emerald-500" />}
+                     {is3DMode ? 'المحاكاة ثلاثية الأبعاد (3D)' : 'المحاكاة ثنائية الأبعاد (2D)'}
+                   </h3>
+                   <div className="flex bg-slate-800 rounded-lg p-1 border border-slate-700/50">
+                      <button 
+                        onClick={() => setIs3DMode(false)}
+                        className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${!is3DMode ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
+                      >
+                        2D
+                      </button>
+                      <button 
+                        onClick={() => setIs3DMode(true)}
+                        className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${is3DMode ? 'bg-emerald-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
+                      >
+                        3D
+                      </button>
+                   </div>
                 </div>
+
+                {/* Simulation Section */}
+                <div className="flex-1 min-h-[400px]">
+                   {is3DMode ? (
+                      <Simulation3D
+                        config={robotConfig}
+                        isRunning={isRunning} 
+                        codeOutput={simCommands} 
+                        resetSimulation={() => setSimCommands([])}
+                        startPosition={{ x: 200, y: 200, angle: 0 }}
+                      />
+                   ) : (
+                      <SimulationViewport 
+                        config={robotConfig}
+                        isRunning={isRunning} 
+                        codeOutput={simCommands} 
+                        resetSimulation={() => setSimCommands([])}
+                        startPosition={{ x: 100, y: 100, angle: 0 }}
+                      />
+                   )}
+                </div>
+
                 {/* Hardware Status (Simulated) */}
                 <div className="h-48 bg-slate-900 border border-slate-700 rounded-2xl p-4 flex gap-4 overflow-x-auto">
                     <div className="min-w-[150px] bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">

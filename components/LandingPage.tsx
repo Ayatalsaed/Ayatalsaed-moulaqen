@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Bot, Code, Layers, Zap, ArrowLeft, Brain, Box, Check, Users, Building, Mail, HelpCircle, FileText, Play, RotateCw, Navigation } from 'lucide-react';
 import { PublicView, RobotConfig } from '../types';
 import SimulationViewport from './SimulationViewport';
+import Simulation3D from './Simulation3D';
 
 interface LandingPageProps {
   onStart: () => void;
@@ -356,6 +357,7 @@ const FeaturesContent = () => (
 const DemoContent = ({ onStart }: { onStart: () => void }) => {
   const [activeScenario, setActiveScenario] = useState<'square' | 'zigzag' | 'complex'>('square');
   const [simulationKey, setSimulationKey] = useState(0);
+  const [is3D, setIs3D] = useState(false);
 
   const scenarios = {
     square: [
@@ -400,37 +402,67 @@ const DemoContent = ({ onStart }: { onStart: () => void }) => {
        </div>
 
        {/* Control Bar */}
-       <div className="flex justify-center gap-4 mb-6">
-          <button 
-             onClick={() => handleScenarioChange('square')}
-             className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${activeScenario === 'square' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
-          >
-             <Box size={16} /> مسار مربع
-          </button>
-          <button 
-             onClick={() => handleScenarioChange('zigzag')}
-             className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${activeScenario === 'zigzag' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
-          >
-             <Navigation size={16} /> متعرج
-          </button>
-          <button 
-             onClick={() => handleScenarioChange('complex')}
-             className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${activeScenario === 'complex' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
-          >
-             <RotateCw size={16} /> حر
-          </button>
+       <div className="flex flex-col md:flex-row justify-center gap-4 mb-6 items-center">
+          <div className="flex gap-4">
+            <button 
+                onClick={() => handleScenarioChange('square')}
+                className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${activeScenario === 'square' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
+            >
+                <Box size={16} /> مسار مربع
+            </button>
+            <button 
+                onClick={() => handleScenarioChange('zigzag')}
+                className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${activeScenario === 'zigzag' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
+            >
+                <Navigation size={16} /> متعرج
+            </button>
+            <button 
+                onClick={() => handleScenarioChange('complex')}
+                className={`px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${activeScenario === 'complex' ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
+            >
+                <RotateCw size={16} /> حر
+            </button>
+          </div>
+          
+          <div className="w-px h-6 bg-slate-700 hidden md:block"></div>
+
+          <div className="flex bg-slate-800 rounded-lg p-1 border border-slate-700/50">
+                <button 
+                onClick={() => setIs3D(false)}
+                className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${!is3D ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
+                >
+                2D
+                </button>
+                <button 
+                onClick={() => setIs3D(true)}
+                className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${is3D ? 'bg-emerald-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
+                >
+                3D
+                </button>
+            </div>
        </div>
 
        <div className="flex-1 bg-slate-900 rounded-3xl border border-slate-800 overflow-hidden relative shadow-2xl">
           <div className="absolute inset-0 z-0">
-             <SimulationViewport 
-               key={simulationKey}
-               config={DEMO_ROBOT_CONFIG}
-               isRunning={true} 
-               codeOutput={scenarios[activeScenario]} 
-               resetSimulation={() => {}}
-               startPosition={{x: 200, y: 300, angle: 270}}
-             />
+             {is3D ? (
+                <Simulation3D 
+                  key={`3d-${simulationKey}`}
+                  config={DEMO_ROBOT_CONFIG}
+                  isRunning={true} 
+                  codeOutput={scenarios[activeScenario]} 
+                  resetSimulation={() => {}}
+                  startPosition={{x: 200, y: 300, angle: 270}}
+                />
+             ) : (
+                <SimulationViewport 
+                  key={`2d-${simulationKey}`}
+                  config={DEMO_ROBOT_CONFIG}
+                  isRunning={true} 
+                  codeOutput={scenarios[activeScenario]} 
+                  resetSimulation={() => {}}
+                  startPosition={{x: 200, y: 300, angle: 270}}
+                />
+             )}
           </div>
           
           {/* Overlay CTA */}

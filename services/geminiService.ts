@@ -1,14 +1,10 @@
 import { GoogleGenAI } from "@google/genai";
 
-const apiKey = process.env.API_KEY || '';
-const ai = new GoogleGenAI({ apiKey });
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const checkCodeWithGemini = async (code: string, taskDescription: string): Promise<string> => {
-  if (!apiKey) return "API Key not found.";
-
   try {
-    const model = ai.models;
-    const response = await model.generateContent({
+    const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: `User Code:\n${code}\n\nTask:\n${taskDescription}`,
       config: {
@@ -29,11 +25,8 @@ export const checkCodeWithGemini = async (code: string, taskDescription: string)
 };
 
 export const chatWithMulaqqin = async (message: string, context: string): Promise<string> => {
-    if (!apiKey) return "API Key not found.";
-    
     try {
-        const model = ai.models;
-        const response = await model.generateContent({
+        const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: `Context: ${context}\n\nUser Question: ${message}`,
             config: {

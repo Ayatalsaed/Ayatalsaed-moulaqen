@@ -120,6 +120,68 @@ const DEFAULT_CONFIGS: Partial<Record<SensorType, any>> = {
   imu: { accelRange: '4g', gyroRange: '500dps' }
 };
 
+// --- Helper UI Components ---
+
+const ConfigSlider = ({ label, value, min, max, step = 1, unit, onChange, leftLabel, rightLabel }: any) => (
+  <div className="space-y-3 bg-slate-900/30 p-3 rounded-xl border border-slate-800/50">
+    <div className="flex justify-between text-xs text-slate-400">
+        <span className="flex items-center gap-1 font-medium">{label}</span>
+        <span className="text-emerald-400 font-mono bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+            {value} {unit}
+        </span>
+    </div>
+    <div className="relative pt-1">
+        <input 
+            type="range" 
+            min={min} max={max} step={step}
+            value={value}
+            onChange={(e) => onChange(parseInt(e.target.value))}
+            className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 hover:accent-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all"
+        />
+        <div className="flex justify-between text-[10px] text-slate-600 font-mono mt-1">
+            <span>{leftLabel || `${min}${unit}`}</span>
+            <span>{rightLabel || `${max}${unit}`}</span>
+        </div>
+    </div>
+  </div>
+);
+
+const ConfigSelect = ({ label, options, value, onChange }: any) => (
+  <div className="space-y-2 bg-slate-900/30 p-3 rounded-xl border border-slate-800/50">
+    <span className="text-xs text-slate-400 font-medium block">{label}</span>
+    <div className="bg-slate-900 rounded-lg p-1 flex gap-1 border border-slate-700/50">
+        {options.map((opt: string) => (
+            <button
+                key={opt}
+                onClick={() => onChange(opt)}
+                className={`flex-1 py-1.5 text-xs rounded font-medium transition-all focus:outline-none ${
+                    value === opt 
+                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/20' 
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+            >
+                {opt}
+            </button>
+        ))}
+    </div>
+  </div>
+);
+
+const ConfigToggle = ({ label, value, onChange }: any) => (
+  <div className="flex items-center justify-between p-3 bg-slate-900/30 rounded-xl border border-slate-800/50 hover:border-slate-700 transition-colors">
+    <div className="flex items-center gap-2">
+        <div className={`w-2 h-2 rounded-full transition-colors ${value ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-600'}`}></div>
+        <span className="text-xs text-slate-300 font-medium">{label}</span>
+    </div>
+    <button 
+        onClick={() => onChange(!value)}
+        className={`w-9 h-5 rounded-full flex items-center p-1 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 ${value ? 'bg-emerald-600' : 'bg-slate-700'}`}
+    >
+        <div className={`w-3 h-3 bg-white rounded-full transition-transform duration-300 shadow-sm ${value ? 'translate-x-4' : 'translate-x-0'}`}></div>
+    </button>
+  </div>
+);
+
 const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }) => {
   
   const toggleSensor = (id: SensorType) => {
@@ -132,7 +194,6 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
     let newSensorConfig = { ...config.sensorConfig };
     
     if (isAdding) {
-      // Check if config exists, if not, apply default
       const key = id as keyof typeof config.sensorConfig;
       if (!newSensorConfig[key] && DEFAULT_CONFIGS[id]) {
          // @ts-ignore
@@ -157,8 +218,7 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
   };
 
   const resetSensorConfig = (id: SensorType, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent toggling the sensor card
-    
+    e.stopPropagation(); 
     if (DEFAULT_CONFIGS[id]) {
         setConfig({
           ...config,
@@ -171,8 +231,8 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
   };
 
   // Calculate stats
-  const totalPower = SENSORS.filter(s => config.sensors.includes(s.id)).reduce((acc, curr) => acc + curr.power, 20); // Base power 20
-  const totalWeight = SENSORS.filter(s => config.sensors.includes(s.id)).reduce((acc, curr) => acc + curr.weight, 500); // Base weight 500g
+  const totalPower = SENSORS.filter(s => config.sensors.includes(s.id)).reduce((acc, curr) => acc + curr.power, 20); 
+  const totalWeight = SENSORS.filter(s => config.sensors.includes(s.id)).reduce((acc, curr) => acc + curr.weight, 500); 
 
   return (
     <div className="h-full p-4 lg:p-8 animate-fadeIn overflow-y-auto custom-scrollbar">
@@ -323,7 +383,7 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
 
             <div className="space-y-8">
                {(Object.keys(CATEGORY_LABELS) as SensorCategory[]).map((category) => (
-                  <div key={category} className="bg-slate-900/30 border border-slate-800/50 rounded-2xl p-4 md:p-6">
+                  <div key={category} className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 md:p-6 shadow-sm">
                       <div className="flex items-center gap-2 mb-4 text-emerald-400 font-bold text-sm uppercase tracking-wide border-b border-slate-800/50 pb-2">
                          {React.createElement(CATEGORY_LABELS[category].icon, { size: 16 })}
                          {CATEGORY_LABELS[category].label}
@@ -389,177 +449,86 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
                                             </button>
                                         </div>
                                         
-                                        {sensor.id === 'ultrasonic' && (
-                                            <div className="space-y-3">
-                                                <div className="flex justify-between text-xs text-slate-400">
-                                                    <span className="flex items-center gap-1">أقصى مدى قياس <Info size={10} className="text-slate-600"/></span>
-                                                    <span className="text-emerald-400 font-mono bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">{config.sensorConfig.ultrasonic?.range || 200} cm</span>
-                                                </div>
-                                                <div className="relative pt-1">
-                                                    <input 
-                                                        type="range" 
-                                                        min="50" max="400" step="10"
-                                                        value={config.sensorConfig.ultrasonic?.range || 200}
-                                                        onChange={(e) => updateSensorConfig('ultrasonic', 'range', parseInt(e.target.value))}
-                                                        className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 hover:accent-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-                                                    />
-                                                    <div className="flex justify-between text-[10px] text-slate-600 font-mono mt-1">
-                                                        <span>50cm</span>
-                                                        <span>400cm</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
+                                        <div className="space-y-4">
+                                            {sensor.id === 'ultrasonic' && (
+                                                <ConfigSlider 
+                                                    label="أقصى مدى قياس"
+                                                    value={config.sensorConfig.ultrasonic?.range || 200}
+                                                    min={50} max={400} step={10} unit="cm"
+                                                    onChange={(v: number) => updateSensorConfig('ultrasonic', 'range', v)}
+                                                />
+                                            )}
 
-                                        {sensor.id === 'infrared' && (
-                                            <div className="space-y-3">
-                                                <div className="flex justify-between text-xs text-slate-400">
-                                                    <span>حساسية الاستشعار</span>
-                                                    <span className="text-emerald-400 font-mono bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">{config.sensorConfig.infrared?.sensitivity || 50}%</span>
-                                                </div>
-                                                <input 
-                                                    type="range" 
-                                                    min="0" max="100"
+                                            {sensor.id === 'infrared' && (
+                                                <ConfigSlider 
+                                                    label="حساسية الاستشعار"
                                                     value={config.sensorConfig.infrared?.sensitivity || 50}
-                                                    onChange={(e) => updateSensorConfig('infrared', 'sensitivity', parseInt(e.target.value))}
-                                                    className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 hover:accent-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                                                    min={0} max={100} unit="%"
+                                                    onChange={(v: number) => updateSensorConfig('infrared', 'sensitivity', v)}
+                                                    leftLabel="منخفض" rightLabel="عالي"
                                                 />
-                                                <div className="flex justify-between text-[10px] text-slate-600 font-mono mt-1">
-                                                    <span>Low</span>
-                                                    <span>High</span>
-                                                </div>
-                                            </div>
-                                        )}
+                                            )}
 
-                                        {sensor.id === 'color' && (
-                                            <div className="flex items-center justify-between p-3 bg-slate-900/50 rounded-lg border border-slate-700/50 hover:border-slate-600 transition-colors">
-                                                <div className="flex items-center gap-2">
-                                                    <div className={`w-2 h-2 rounded-full ${config.sensorConfig.color?.illumination ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-600'}`}></div>
-                                                    <span className="text-xs text-slate-300">تشغيل إضاءة LED مساعدة</span>
-                                                </div>
-                                                <button 
-                                                    onClick={() => updateSensorConfig('color', 'illumination', !config.sensorConfig.color?.illumination)}
-                                                    className={`w-9 h-5 rounded-full flex items-center p-1 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 ${config.sensorConfig.color?.illumination ? 'bg-emerald-600' : 'bg-slate-700'}`}
-                                                >
-                                                    <div className={`w-3 h-3 bg-white rounded-full transition-transform duration-300 shadow-sm ${config.sensorConfig.color?.illumination ? 'translate-x-4' : 'translate-x-0'}`}></div>
-                                                </button>
-                                            </div>
-                                        )}
-
-                                        {sensor.id === 'gyro' && (
-                                            <div className="space-y-2">
-                                                <span className="text-xs text-slate-400 block">عدد المحاور</span>
-                                                <div className="bg-slate-900/50 rounded-lg p-1 flex gap-1 border border-slate-700/50">
-                                                    {['3-axis', '6-axis'].map((axis) => (
-                                                        <button
-                                                            key={axis}
-                                                            onClick={() => updateSensorConfig('gyro', 'axis', axis)}
-                                                            className={`flex-1 py-1.5 text-xs rounded font-medium transition-all focus:outline-none ${
-                                                                config.sensorConfig.gyro?.axis === axis 
-                                                                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/20' 
-                                                                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-                                                            }`}
-                                                        >
-                                                            {axis}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {sensor.id === 'camera' && (
-                                            <div className="space-y-2">
-                                                <span className="text-xs text-slate-400 block">دقة الصورة</span>
-                                                <div className="bg-slate-900/50 rounded-lg p-1 flex gap-1 border border-slate-700/50">
-                                                    {['720p', '1080p'].map((res) => (
-                                                        <button
-                                                            key={res}
-                                                            onClick={() => updateSensorConfig('camera', 'resolution', res)}
-                                                            className={`flex-1 py-1.5 text-xs rounded font-medium transition-all focus:outline-none ${
-                                                                config.sensorConfig.camera?.resolution === res 
-                                                                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/20' 
-                                                                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-                                                            }`}
-                                                        >
-                                                            {res}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {sensor.id === 'lidar' && (
-                                            <div className="space-y-4">
-                                                <div className="bg-slate-900/30 p-2 rounded-lg border border-slate-800/50">
-                                                <div className="flex justify-between text-xs text-slate-400 mb-2">
-                                                    <span>مدى المسح</span>
-                                                    <span className="text-emerald-400 font-mono bg-emerald-500/10 px-1.5 rounded">{config.sensorConfig.lidar?.range || 8} m</span>
-                                                </div>
-                                                <input 
-                                                    type="range" 
-                                                    min="4" max="20" step="1"
-                                                    value={config.sensorConfig.lidar?.range || 8}
-                                                    onChange={(e) => updateSensorConfig('lidar', 'range', parseInt(e.target.value))}
-                                                    className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 hover:accent-emerald-400 focus:outline-none"
+                                            {sensor.id === 'color' && (
+                                                <ConfigToggle 
+                                                    label="تشغيل إضاءة LED مساعدة"
+                                                    value={config.sensorConfig.color?.illumination}
+                                                    onChange={(v: boolean) => updateSensorConfig('color', 'illumination', v)}
                                                 />
-                                                </div>
-                                                <div className="bg-slate-900/30 p-2 rounded-lg border border-slate-800/50">
-                                                <div className="flex justify-between text-xs text-slate-400 mb-2">
-                                                    <span>معدل العينات</span>
-                                                    <span className="text-emerald-400 font-mono bg-emerald-500/10 px-1.5 rounded">{config.sensorConfig.lidar?.sampleRate || 4000} Hz</span>
-                                                </div>
-                                                <input 
-                                                    type="range" 
-                                                    min="2000" max="8000" step="1000"
-                                                    value={config.sensorConfig.lidar?.sampleRate || 4000}
-                                                    onChange={(e) => updateSensorConfig('lidar', 'sampleRate', parseInt(e.target.value))}
-                                                    className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 hover:accent-emerald-400 focus:outline-none"
+                                            )}
+
+                                            {sensor.id === 'gyro' && (
+                                                <ConfigSelect 
+                                                    label="عدد المحاور"
+                                                    options={['3-axis', '6-axis']}
+                                                    value={config.sensorConfig.gyro?.axis}
+                                                    onChange={(v: any) => updateSensorConfig('gyro', 'axis', v)}
                                                 />
-                                                </div>
-                                            </div>
-                                        )}
+                                            )}
 
-                                        {sensor.id === 'imu' && (
-                                            <div className="space-y-4">
-                                                <div>
-                                                <span className="text-[10px] uppercase font-bold text-slate-500 block mb-2">مدى التسارع (Accelerometer)</span>
-                                                <div className="bg-slate-900/50 rounded-lg p-1 flex gap-1 border border-slate-700/50">
-                                                    {['2g', '4g', '8g'].map((range) => (
-                                                        <button
-                                                            key={range}
-                                                            onClick={() => updateSensorConfig('imu', 'accelRange', range)}
-                                                            className={`flex-1 py-1.5 text-xs rounded font-medium transition-all focus:outline-none ${
-                                                                config.sensorConfig.imu?.accelRange === range
-                                                                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/20' 
-                                                                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-                                                            }`}
-                                                        >
-                                                            {range}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                                </div>
-                                                <div>
-                                                <span className="text-[10px] uppercase font-bold text-slate-500 block mb-2">مدى الجيروسكوب (Gyroscope)</span>
-                                                <div className="bg-slate-900/50 rounded-lg p-1 flex gap-1 border border-slate-700/50">
-                                                    {['250dps', '500dps'].map((range) => (
-                                                        <button
-                                                            key={range}
-                                                            onClick={() => updateSensorConfig('imu', 'gyroRange', range)}
-                                                            className={`flex-1 py-1.5 text-xs rounded font-medium transition-all focus:outline-none ${
-                                                                config.sensorConfig.imu?.gyroRange === range
-                                                                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/20' 
-                                                                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-                                                            }`}
-                                                        >
-                                                            {range}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                                </div>
-                                            </div>
-                                        )}
+                                            {sensor.id === 'camera' && (
+                                                <ConfigSelect 
+                                                    label="دقة الصورة"
+                                                    options={['720p', '1080p']}
+                                                    value={config.sensorConfig.camera?.resolution}
+                                                    onChange={(v: any) => updateSensorConfig('camera', 'resolution', v)}
+                                                />
+                                            )}
 
+                                            {sensor.id === 'lidar' && (
+                                                <>
+                                                    <ConfigSlider 
+                                                        label="مدى المسح"
+                                                        value={config.sensorConfig.lidar?.range || 8}
+                                                        min={4} max={20} unit="m"
+                                                        onChange={(v: number) => updateSensorConfig('lidar', 'range', v)}
+                                                    />
+                                                    <ConfigSlider 
+                                                        label="معدل العينات"
+                                                        value={config.sensorConfig.lidar?.sampleRate || 4000}
+                                                        min={2000} max={8000} step={1000} unit="Hz"
+                                                        onChange={(v: number) => updateSensorConfig('lidar', 'sampleRate', v)}
+                                                    />
+                                                </>
+                                            )}
+
+                                            {sensor.id === 'imu' && (
+                                                <>
+                                                    <ConfigSelect 
+                                                        label="مدى التسارع (Accelerometer)"
+                                                        options={['2g', '4g', '8g']}
+                                                        value={config.sensorConfig.imu?.accelRange}
+                                                        onChange={(v: any) => updateSensorConfig('imu', 'accelRange', v)}
+                                                    />
+                                                    <ConfigSelect 
+                                                        label="مدى الجيروسكوب (Gyroscope)"
+                                                        options={['250dps', '500dps']}
+                                                        value={config.sensorConfig.imu?.gyroRange}
+                                                        onChange={(v: any) => updateSensorConfig('imu', 'gyroRange', v)}
+                                                    />
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
                             </div>

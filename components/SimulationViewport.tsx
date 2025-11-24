@@ -26,6 +26,8 @@ const SimulationViewport: React.FC<SimulationViewportProps> = ({
 
   // Draw the grid and robot
   const draw = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+    const time = performance.now();
+
     // Clear
     ctx.clearRect(0, 0, width, height);
     
@@ -88,18 +90,27 @@ const SimulationViewport: React.FC<SimulationViewportProps> = ({
             ctx.fillRect(12, -8, 4, 16); // Sensor Bar
             
             if (isRunning) {
-                ctx.strokeStyle = '#6366f1'; // Indigo-500
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.arc(15, 0, 10, -0.5, 0.5);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.arc(15, 0, 18, -0.5, 0.5);
-                ctx.stroke();
+                // Pulsing Waves Animation
+                ctx.strokeStyle = 'rgba(99, 102, 241, 0.6)'; // Indigo-500
+                ctx.lineWidth = 1.5;
+                
+                const maxRadius = config.sensorConfig.ultrasonic?.range ? config.sensorConfig.ultrasonic.range / 2 : 50; // Scale down visual range
+                const waveCount = 3;
+                const speed = 0.05;
+
+                for(let i=0; i<waveCount; i++) {
+                    const offset = (time * speed + (i * (maxRadius / waveCount))) % maxRadius;
+                    const opacity = 1 - (offset / maxRadius);
+                    
+                    ctx.strokeStyle = `rgba(99, 102, 241, ${opacity})`;
+                    ctx.beginPath();
+                    ctx.arc(15, 0, 10 + offset, -0.5, 0.5);
+                    ctx.stroke();
+                }
             }
         }
 
-        // Camera (Front Lens)
+        // Camera (Front Lens & FOV)
         if (config.sensors.includes('camera')) {
             ctx.fillStyle = '#000000';
             ctx.beginPath();
@@ -113,6 +124,34 @@ const SimulationViewport: React.FC<SimulationViewportProps> = ({
             ctx.beginPath();
             ctx.arc(14, 0, 2, 0, Math.PI * 2);
             ctx.fill();
+
+            if (isRunning) {
+                // FOV Cone
+                const fovLength = 100;
+                const fovWidth = 50;
+                
+                // Fill
+                const gradient = ctx.createLinearGradient(16, 0, 16 + fovLength, 0);
+                gradient.addColorStop(0, 'rgba(56, 189, 248, 0.2)');
+                gradient.addColorStop(1, 'rgba(56, 189, 248, 0)');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.moveTo(16, 0);
+                ctx.lineTo(16 + fovLength, -fovWidth);
+                ctx.lineTo(16 + fovLength, fovWidth);
+                ctx.fill();
+
+                // Outline
+                ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(16, 0);
+                ctx.lineTo(16 + fovLength, -fovWidth);
+                ctx.moveTo(16, 0);
+                ctx.lineTo(16 + fovLength, fovWidth);
+                ctx.stroke();
+            }
         }
 
         // Color Sensor (Bottom Front LED)
@@ -126,8 +165,8 @@ const SimulationViewport: React.FC<SimulationViewportProps> = ({
                  ctx.fillStyle = 'rgba(251, 191, 36, 0.2)';
                  ctx.beginPath();
                  ctx.moveTo(8, 8);
-                 ctx.lineTo(20, 15);
-                 ctx.lineTo(20, 5);
+                 ctx.lineTo(25, 20);
+                 ctx.lineTo(25, -4);
                  ctx.fill();
              }
         }
@@ -146,18 +185,25 @@ const SimulationViewport: React.FC<SimulationViewportProps> = ({
 
             // Rotating head
             if (isRunning) {
-                lidarAngle.current += 0.2;
+                lidarAngle.current += 0.15;
                 ctx.save();
                 ctx.rotate(lidarAngle.current);
                 ctx.fillStyle = '#b91c1c';
                 ctx.fillRect(-2, -8, 4, 4);
                 // Scan Ray
-                ctx.strokeStyle = 'rgba(239, 68, 68, 0.3)';
+                ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(0, -8);
-                ctx.lineTo(0, -60);
+                ctx.lineTo(0, -80);
                 ctx.stroke();
+
+                // Simulated Points
+                ctx.fillStyle = 'rgba(239, 68, 68, 0.6)';
+                ctx.beginPath();
+                ctx.arc(0, -80, 2, 0, Math.PI * 2);
+                ctx.fill();
+
                 ctx.restore();
             }
         }
@@ -167,6 +213,14 @@ const SimulationViewport: React.FC<SimulationViewportProps> = ({
             ctx.fillStyle = '#f43f5e'; // Rose
             ctx.fillRect(8, 12, 4, 4); // Right
             ctx.fillRect(8, -16, 4, 4); // Left
+
+            if (isRunning) {
+                ctx.fillStyle = 'rgba(244, 63, 94, 0.4)';
+                ctx.beginPath();
+                ctx.arc(10, 14, 4, 0, Math.PI * 2);
+                ctx.arc(10, -14, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
     }
 

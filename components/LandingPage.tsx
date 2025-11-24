@@ -1,12 +1,24 @@
-
 import React, { useState } from 'react';
 import { Bot, Code, Layers, Zap, ArrowLeft, Brain, Box, Check, Users, Building, Mail, HelpCircle, FileText, Play, RotateCw, Navigation } from 'lucide-react';
-import { PublicView } from '../types';
+import { PublicView, RobotConfig } from '../types';
 import SimulationViewport from './SimulationViewport';
 
 interface LandingPageProps {
   onStart: () => void;
 }
+
+const DEMO_ROBOT_CONFIG: RobotConfig = {
+  name: 'Demo Bot',
+  type: 'rover',
+  sensors: ['lidar', 'ultrasonic', 'camera'],
+  sensorConfig: {
+      lidar: { range: 10, sampleRate: 4000 },
+      ultrasonic: { range: 200 },
+      camera: { resolution: '720p' },
+      color: { illumination: true }
+  },
+  color: '#10b981'
+};
 
 const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
   const [currentPage, setCurrentPage] = useState<PublicView>(PublicView.HOME);
@@ -413,9 +425,11 @@ const DemoContent = ({ onStart }: { onStart: () => void }) => {
           <div className="absolute inset-0 z-0">
              <SimulationViewport 
                key={simulationKey}
+               config={DEMO_ROBOT_CONFIG}
                isRunning={true} 
                codeOutput={scenarios[activeScenario]} 
                resetSimulation={() => {}}
+               startPosition={{x: 200, y: 300, angle: 270}}
              />
           </div>
           

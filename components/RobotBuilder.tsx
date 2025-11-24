@@ -123,18 +123,18 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
   const totalWeight = SENSORS.filter(s => config.sensors.includes(s.id)).reduce((acc, curr) => acc + curr.weight, 500); // Base weight 500g
 
   return (
-    <div className="h-full p-4 lg:p-8 animate-fadeIn overflow-y-auto">
-      <div className="max-w-6xl mx-auto">
+    <div className="h-full p-4 lg:p-8 animate-fadeIn overflow-y-auto custom-scrollbar">
+      <div className="max-w-6xl mx-auto pb-20">
         
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
             <h2 className="text-3xl font-bold text-white mb-1">ورشة بناء الروبوت</h2>
             <p className="text-slate-400">صمم الروبوت الخاص بك، اختر الهيكل والحساسات المناسبة للمهمة.</p>
           </div>
           <button 
             onClick={onSave}
-            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-emerald-600/20 transition-all"
+            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-emerald-600/20 transition-all hover:scale-105 active:scale-95"
           >
             <Save size={20} />
             <span>حفظ التكوين</span>
@@ -149,17 +149,18 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
             {/* Name & Type Card */}
             <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6">
                <div className="mb-4">
-                 <label className="block text-slate-400 text-sm mb-2">اسم الروبوت</label>
+                 <label className="block text-slate-400 text-sm mb-2 font-medium">اسم الروبوت</label>
                  <input 
                     type="text" 
                     value={config.name}
                     onChange={(e) => setConfig({...config, name: e.target.value})}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:border-emerald-500 outline-none transition-colors"
+                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all placeholder:text-slate-600"
+                    placeholder="أدخل اسماً مميزاً..."
                  />
                </div>
 
                <div>
-                 <label className="block text-slate-400 text-sm mb-2">نوع الهيكل</label>
+                 <label className="block text-slate-400 text-sm mb-2 font-medium">نوع الهيكل</label>
                  <div className="grid grid-cols-3 gap-2">
                     {[
                       { id: 'rover', label: 'عربة', icon: Box },
@@ -169,14 +170,14 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
                       <button
                         key={type.id}
                         onClick={() => setConfig({...config, type: type.id as any})}
-                        className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all ${
+                        className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${
                           config.type === type.id 
-                            ? 'bg-emerald-600/20 border-emerald-500 text-emerald-400' 
-                            : 'bg-slate-900 border-slate-700 text-slate-400 hover:bg-slate-800'
+                            ? 'bg-emerald-600/10 border-emerald-500 text-emerald-400' 
+                            : 'bg-slate-900 border-slate-700 text-slate-400 hover:bg-slate-800 hover:border-slate-600'
                         }`}
                       >
-                        <type.icon size={20} className="mb-1" />
-                        <span className="text-xs">{type.label}</span>
+                        <type.icon size={22} className="mb-1" />
+                        <span className="text-xs font-bold">{type.label}</span>
                       </button>
                     ))}
                  </div>
@@ -184,49 +185,51 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
             </div>
 
             {/* Visual Preview (Abstract) */}
-            <div className="bg-slate-900 border border-slate-700 rounded-2xl p-8 flex items-center justify-center relative min-h-[300px]">
-               <div className="w-48 h-48 bg-slate-800 rounded-3xl border-2 border-slate-700 relative flex items-center justify-center shadow-2xl">
+            <div className="bg-slate-900 border border-slate-700 rounded-2xl p-8 flex items-center justify-center relative min-h-[300px] overflow-hidden group">
+               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.1)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+               
+               <div className="w-48 h-48 bg-slate-800 rounded-3xl border-2 border-slate-700 relative flex items-center justify-center shadow-2xl z-10 transition-transform duration-500 group-hover:scale-105">
                   {/* Wheels */}
-                  <div className="absolute -left-4 top-4 w-4 h-12 bg-slate-700 rounded-l-lg"></div>
-                  <div className="absolute -left-4 bottom-4 w-4 h-12 bg-slate-700 rounded-l-lg"></div>
-                  <div className="absolute -right-4 top-4 w-4 h-12 bg-slate-700 rounded-r-lg"></div>
-                  <div className="absolute -right-4 bottom-4 w-4 h-12 bg-slate-700 rounded-r-lg"></div>
+                  <div className="absolute -left-4 top-4 w-4 h-12 bg-slate-700 rounded-l-lg border-l border-t border-b border-slate-600"></div>
+                  <div className="absolute -left-4 bottom-4 w-4 h-12 bg-slate-700 rounded-l-lg border-l border-t border-b border-slate-600"></div>
+                  <div className="absolute -right-4 top-4 w-4 h-12 bg-slate-700 rounded-r-lg border-r border-t border-b border-slate-600"></div>
+                  <div className="absolute -right-4 bottom-4 w-4 h-12 bg-slate-700 rounded-r-lg border-r border-t border-b border-slate-600"></div>
                   
                   {/* Body */}
                   <div className="text-slate-500 font-mono text-xs text-center">
-                     <Cpu size={48} className="mx-auto mb-2 opacity-50" />
-                     {config.name}
+                     <Cpu size={48} className="mx-auto mb-2 opacity-30 text-emerald-500" />
+                     <span className="opacity-70 tracking-widest uppercase">{config.name || 'ROBOT'}</span>
                   </div>
 
                   {/* Mounted Sensors Visualization */}
                   {config.sensors.includes('ultrasonic') && (
-                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-indigo-500/20 border border-indigo-500 p-1.5 rounded-lg" title="Ultrasonic">
+                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-indigo-500/20 border border-indigo-500 p-1.5 rounded-lg shadow-lg shadow-indigo-500/20" title="Ultrasonic">
                       <Wifi size={16} className="text-indigo-400" />
                     </div>
                   )}
 
                   {config.sensors.includes('lidar') && (
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-red-500/20 border border-red-500 p-2 rounded-full z-10 animate-pulse" title="LiDAR">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-red-500/20 border border-red-500 p-2 rounded-full z-10 animate-pulse shadow-lg shadow-red-500/20" title="LiDAR">
                       <Radar size={20} className="text-red-400" />
                     </div>
                   )}
                   
                   {config.sensors.includes('infrared') && (
                     <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-                       <div className="bg-rose-500/20 border border-rose-500 p-1.5 rounded-lg">
+                       <div className="bg-rose-500/20 border border-rose-500 p-1.5 rounded-lg shadow-lg shadow-rose-500/20">
                          <Activity size={16} className="text-rose-400" />
                        </div>
                     </div>
                   )}
 
                   {config.sensors.includes('color') && (
-                    <div className="absolute top-1/2 -right-6 -translate-y-1/2 bg-amber-500/20 border border-amber-500 p-1.5 rounded-lg">
+                    <div className="absolute top-1/2 -right-6 -translate-y-1/2 bg-amber-500/20 border border-amber-500 p-1.5 rounded-lg shadow-lg shadow-amber-500/20">
                       <Eye size={16} className="text-amber-400" />
                     </div>
                   )}
 
                   {config.sensors.includes('imu') && (
-                    <div className="absolute bottom-2 right-2 bg-blue-500/20 border border-blue-500 p-1 rounded" title="IMU">
+                    <div className="absolute bottom-2 right-2 bg-blue-500/20 border border-blue-500 p-1 rounded shadow-lg shadow-blue-500/20" title="IMU">
                       <Crosshair size={12} className="text-blue-400" />
                     </div>
                   )}
@@ -236,21 +239,21 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
             {/* Stats */}
             <div className="grid grid-cols-2 gap-4">
                <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center text-yellow-500">
+                  <div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center text-yellow-500 shadow-sm shadow-yellow-500/10">
                     <Zap size={20} />
                   </div>
                   <div>
-                    <div className="text-xs text-slate-400">الطاقة</div>
-                    <div className="font-bold text-slate-200">{totalPower} mAh</div>
+                    <div className="text-xs text-slate-400 font-medium">الطاقة</div>
+                    <div className="font-bold text-slate-200">{totalPower} <span className="text-[10px] text-slate-500">mAh</span></div>
                   </div>
                </div>
                <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500">
+                  <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 shadow-sm shadow-blue-500/10">
                     <Scale size={20} />
                   </div>
                   <div>
-                    <div className="text-xs text-slate-400">الوزن</div>
-                    <div className="font-bold text-slate-200">{totalWeight} g</div>
+                    <div className="text-xs text-slate-400 font-medium">الوزن</div>
+                    <div className="font-bold text-slate-200">{totalWeight} <span className="text-[10px] text-slate-500">g</span></div>
                   </div>
                </div>
             </div>
@@ -259,105 +262,120 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
 
           {/* Right Column: Sensor Selection */}
           <div className="lg:col-span-2">
-            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
               <Cpu className="text-emerald-500" />
-              إدارة الحساسات والمستشعرات
+              تكوين الحساسات والمستشعرات
             </h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {SENSORS.map((sensor) => {
                 const isSelected = config.sensors.includes(sensor.id);
                 return (
                   <div 
                     key={sensor.id}
-                    className={`relative p-5 rounded-2xl border-2 transition-all duration-200 ${
+                    className={`relative rounded-2xl border-2 transition-all duration-300 flex flex-col ${
                       isSelected 
-                        ? 'bg-slate-800 border-emerald-500 shadow-lg shadow-emerald-900/20' 
+                        ? 'bg-slate-800 border-emerald-500 shadow-xl shadow-emerald-900/10 scale-[1.01]' 
                         : 'bg-slate-900 border-slate-700 hover:border-slate-600'
                     }`}
                   >
-                    <div className="flex items-start justify-between mb-3 cursor-pointer" onClick={() => toggleSensor(sensor.id)}>
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
-                        isSelected ? 'bg-emerald-500 text-white' : 'bg-slate-800 text-slate-400'
-                      }`}>
-                        <sensor.icon size={24} />
-                      </div>
-                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
-                        isSelected ? 'border-emerald-500 bg-emerald-500' : 'border-slate-600 bg-transparent'
-                      }`}>
-                         {isSelected && <div className="w-2 h-2 bg-white rounded-full"></div>}
-                      </div>
+                    <div className="p-5 pb-2 cursor-pointer flex-1" onClick={() => toggleSensor(sensor.id)}>
+                        <div className="flex items-start justify-between mb-3">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+                            isSelected ? 'bg-emerald-500 text-white' : 'bg-slate-800 text-slate-400 border border-slate-700'
+                        }`}>
+                            <sensor.icon size={24} />
+                        </div>
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                            isSelected ? 'border-emerald-500 bg-emerald-500' : 'border-slate-600 bg-transparent'
+                        }`}>
+                            {isSelected && <div className="w-2.5 h-2.5 bg-white rounded-full"></div>}
+                        </div>
+                        </div>
+                        
+                        <h4 className={`text-lg font-bold mb-1 ${isSelected ? 'text-white' : 'text-slate-300'}`}>
+                        {sensor.name}
+                        </h4>
+                        <p className="text-sm text-slate-400 leading-relaxed min-h-[2.5em]">
+                        {sensor.desc}
+                        </p>
+                        
+                        <div className="flex items-center gap-3 text-xs font-mono text-slate-500 mt-4 mb-2">
+                            <span className="flex items-center gap-1 bg-slate-950 px-2 py-1 rounded">
+                                <Zap size={10} className="text-yellow-500" /> {sensor.power}mA
+                            </span>
+                            <span className="flex items-center gap-1 bg-slate-950 px-2 py-1 rounded">
+                                <Scale size={10} className="text-blue-400" /> {sensor.weight}g
+                            </span>
+                        </div>
                     </div>
-                    
-                    <h4 className={`text-lg font-bold mb-1 cursor-pointer ${isSelected ? 'text-white' : 'text-slate-300'}`} onClick={() => toggleSensor(sensor.id)}>
-                      {sensor.name}
-                    </h4>
-                    <p className="text-sm text-slate-400 mb-4 leading-relaxed cursor-pointer" onClick={() => toggleSensor(sensor.id)}>
-                      {sensor.desc}
-                    </p>
 
-                    {/* Sensor Specific Configurations */}
+                    {/* Sensor Specific Configurations Panel */}
                     {isSelected && (
-                        <div className="mt-4 pt-4 border-t border-slate-700/50 animate-fadeIn">
-                             <div className="flex items-center gap-2 mb-3 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                        <div className="mt-2 pt-4 px-5 pb-5 bg-slate-950/30 rounded-b-2xl border-t border-slate-700/50 animate-fadeIn">
+                             <div className="flex items-center gap-2 mb-4 text-emerald-400 text-xs font-bold uppercase tracking-wider">
                                 <Settings2 size={12} />
-                                إعدادات الحساس
+                                تخصيص {sensor.name}
                              </div>
                              
                              {sensor.id === 'ultrasonic' && (
-                                <div>
-                                    <div className="flex justify-between text-xs text-slate-400 mb-1">
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-xs text-slate-400">
                                         <span>أقصى مدى قياس</span>
-                                        <span>{config.sensorConfig.ultrasonic?.range || 200} سم</span>
+                                        <span className="text-emerald-400 font-mono bg-emerald-500/10 px-1.5 rounded">{config.sensorConfig.ultrasonic?.range || 200} cm</span>
                                     </div>
                                     <input 
                                         type="range" 
                                         min="50" max="400" step="10"
                                         value={config.sensorConfig.ultrasonic?.range || 200}
                                         onChange={(e) => updateSensorConfig('ultrasonic', 'range', parseInt(e.target.value))}
-                                        className="w-full h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                                        className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 hover:accent-emerald-400"
                                     />
+                                    <div className="flex justify-between text-[10px] text-slate-600 font-mono">
+                                        <span>50cm</span>
+                                        <span>400cm</span>
+                                    </div>
                                 </div>
                              )}
 
                              {sensor.id === 'infrared' && (
-                                <div>
-                                    <div className="flex justify-between text-xs text-slate-400 mb-1">
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-xs text-slate-400">
                                         <span>حساسية الضوء</span>
-                                        <span>{config.sensorConfig.infrared?.sensitivity || 50}%</span>
+                                        <span className="text-emerald-400 font-mono bg-emerald-500/10 px-1.5 rounded">{config.sensorConfig.infrared?.sensitivity || 50}%</span>
                                     </div>
                                     <input 
                                         type="range" 
                                         min="0" max="100"
                                         value={config.sensorConfig.infrared?.sensitivity || 50}
                                         onChange={(e) => updateSensorConfig('infrared', 'sensitivity', parseInt(e.target.value))}
-                                        className="w-full h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                                        className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 hover:accent-emerald-400"
                                     />
                                 </div>
                              )}
 
                              {sensor.id === 'color' && (
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm text-slate-300">تشغيل إضاءة LED مساعدة</span>
+                                <div className="flex items-center justify-between p-2 bg-slate-800 rounded-lg border border-slate-700/50">
+                                    <span className="text-xs text-slate-300">تشغيل إضاءة LED مساعدة</span>
                                     <button 
                                         onClick={() => updateSensorConfig('color', 'illumination', !config.sensorConfig.color?.illumination)}
-                                        className={`w-10 h-5 rounded-full flex items-center p-1 transition-colors ${config.sensorConfig.color?.illumination ? 'bg-emerald-500' : 'bg-slate-600'}`}
+                                        className={`w-9 h-5 rounded-full flex items-center p-1 transition-colors duration-300 ${config.sensorConfig.color?.illumination ? 'bg-emerald-500' : 'bg-slate-600'}`}
                                     >
-                                        <div className={`w-3 h-3 bg-white rounded-full transition-transform ${config.sensorConfig.color?.illumination ? 'translate-x-0' : '-translate-x-5'}`}></div>
+                                        <div className={`w-3 h-3 bg-white rounded-full transition-transform duration-300 shadow-sm ${config.sensorConfig.color?.illumination ? 'translate-x-0' : '-translate-x-4'}`}></div>
                                     </button>
                                 </div>
                              )}
 
                              {sensor.id === 'gyro' && (
-                                 <div className="flex gap-2">
+                                 <div className="bg-slate-800 rounded-lg p-1 flex gap-1 border border-slate-700/50">
                                      {['3-axis', '6-axis'].map((axis) => (
                                          <button
                                             key={axis}
                                             onClick={() => updateSensorConfig('gyro', 'axis', axis)}
-                                            className={`flex-1 py-1 text-xs rounded border transition-colors ${
+                                            className={`flex-1 py-1.5 text-xs rounded font-medium transition-all ${
                                                 config.sensorConfig.gyro?.axis === axis 
-                                                ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' 
-                                                : 'bg-slate-800 border-slate-600 text-slate-400'
+                                                ? 'bg-emerald-600 text-white shadow-md' 
+                                                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700'
                                             }`}
                                          >
                                              {axis}
@@ -367,15 +385,15 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
                              )}
 
                              {sensor.id === 'camera' && (
-                                 <div className="flex gap-2">
+                                 <div className="bg-slate-800 rounded-lg p-1 flex gap-1 border border-slate-700/50">
                                      {['720p', '1080p'].map((res) => (
                                          <button
                                             key={res}
                                             onClick={() => updateSensorConfig('camera', 'resolution', res)}
-                                            className={`flex-1 py-1 text-xs rounded border transition-colors ${
+                                            className={`flex-1 py-1.5 text-xs rounded font-medium transition-all ${
                                                 config.sensorConfig.camera?.resolution === res 
-                                                ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' 
-                                                : 'bg-slate-800 border-slate-600 text-slate-400'
+                                                ? 'bg-emerald-600 text-white shadow-md' 
+                                                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700'
                                             }`}
                                          >
                                              {res}
@@ -385,49 +403,49 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
                              )}
 
                              {sensor.id === 'lidar' && (
-                                <div>
-                                    <div className="mb-3">
-                                      <div className="flex justify-between text-xs text-slate-400 mb-1">
-                                          <span>مدى المسح (متر)</span>
-                                          <span>{config.sensorConfig.lidar?.range || 8} م</span>
+                                <div className="space-y-4">
+                                    <div>
+                                      <div className="flex justify-between text-xs text-slate-400 mb-2">
+                                          <span>مدى المسح</span>
+                                          <span className="text-emerald-400 font-mono bg-emerald-500/10 px-1.5 rounded">{config.sensorConfig.lidar?.range || 8} m</span>
                                       </div>
                                       <input 
                                           type="range" 
                                           min="4" max="20" step="1"
                                           value={config.sensorConfig.lidar?.range || 8}
                                           onChange={(e) => updateSensorConfig('lidar', 'range', parseInt(e.target.value))}
-                                          className="w-full h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                                          className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 hover:accent-emerald-400"
                                       />
                                     </div>
                                     <div>
-                                      <div className="flex justify-between text-xs text-slate-400 mb-1">
-                                          <span>معدل العينات (Hz)</span>
-                                          <span>{config.sensorConfig.lidar?.sampleRate || 4000} Hz</span>
+                                      <div className="flex justify-between text-xs text-slate-400 mb-2">
+                                          <span>معدل العينات</span>
+                                          <span className="text-emerald-400 font-mono bg-emerald-500/10 px-1.5 rounded">{config.sensorConfig.lidar?.sampleRate || 4000} Hz</span>
                                       </div>
                                       <input 
                                           type="range" 
                                           min="2000" max="8000" step="1000"
                                           value={config.sensorConfig.lidar?.sampleRate || 4000}
                                           onChange={(e) => updateSensorConfig('lidar', 'sampleRate', parseInt(e.target.value))}
-                                          className="w-full h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                                          className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 hover:accent-emerald-400"
                                       />
                                     </div>
                                 </div>
                              )}
 
                              {sensor.id === 'imu' && (
-                                 <div className="space-y-3">
+                                 <div className="space-y-4">
                                      <div>
-                                       <span className="text-xs text-slate-400 block mb-1">مدى التسارع (Accelerometer)</span>
-                                       <div className="flex gap-1">
+                                       <span className="text-[10px] uppercase font-bold text-slate-500 block mb-2">مدى التسارع (Accelerometer)</span>
+                                       <div className="bg-slate-800 rounded-lg p-1 flex gap-1 border border-slate-700/50">
                                          {['2g', '4g', '8g'].map((range) => (
                                              <button
                                                 key={range}
                                                 onClick={() => updateSensorConfig('imu', 'accelRange', range)}
-                                                className={`flex-1 py-1 text-xs rounded border transition-colors ${
+                                                className={`flex-1 py-1.5 text-xs rounded font-medium transition-all ${
                                                     config.sensorConfig.imu?.accelRange === range
-                                                    ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' 
-                                                    : 'bg-slate-800 border-slate-600 text-slate-400'
+                                                    ? 'bg-emerald-600 text-white shadow-md' 
+                                                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700'
                                                 }`}
                                              >
                                                  {range}
@@ -436,16 +454,16 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
                                        </div>
                                      </div>
                                      <div>
-                                       <span className="text-xs text-slate-400 block mb-1">مدى الجيروسكوب (Gyroscope)</span>
-                                       <div className="flex gap-1">
+                                       <span className="text-[10px] uppercase font-bold text-slate-500 block mb-2">مدى الجيروسكوب (Gyroscope)</span>
+                                       <div className="bg-slate-800 rounded-lg p-1 flex gap-1 border border-slate-700/50">
                                          {['250dps', '500dps'].map((range) => (
                                              <button
                                                 key={range}
                                                 onClick={() => updateSensorConfig('imu', 'gyroRange', range)}
-                                                className={`flex-1 py-1 text-xs rounded border transition-colors ${
+                                                className={`flex-1 py-1.5 text-xs rounded font-medium transition-all ${
                                                     config.sensorConfig.imu?.gyroRange === range
-                                                    ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' 
-                                                    : 'bg-slate-800 border-slate-600 text-slate-400'
+                                                    ? 'bg-emerald-600 text-white shadow-md' 
+                                                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700'
                                                 }`}
                                              >
                                                  {range}
@@ -458,26 +476,17 @@ const RobotBuilder: React.FC<RobotBuilderProps> = ({ config, setConfig, onSave }
 
                         </div>
                     )}
-
-                    <div className="flex items-center gap-3 text-xs font-mono border-t border-slate-700/50 pt-3 mt-4">
-                      <span className="flex items-center gap-1 text-yellow-500/80">
-                        <Zap size={12} /> {sensor.power}mA
-                      </span>
-                      <span className="flex items-center gap-1 text-blue-400/80">
-                        <Scale size={12} /> {sensor.weight}g
-                      </span>
-                    </div>
                   </div>
                 );
               })}
             </div>
             
-            <div className="mt-6 bg-indigo-900/20 border border-indigo-500/30 p-4 rounded-xl flex items-start gap-3">
+            <div className="mt-6 bg-indigo-900/20 border border-indigo-500/30 p-4 rounded-xl flex items-start gap-3 shadow-lg shadow-indigo-900/10">
                <div className="mt-1 text-indigo-400"><Video size={20} /></div>
                <div>
                  <h4 className="font-bold text-indigo-200 text-sm">نصيحة المعلم الذكي</h4>
-                 <p className="text-xs text-indigo-300/80 mt-1">
-                   إضافة الكاميرا أو LiDAR تستهلك طاقة عالية وتزيد وزن الروبوت، مما قد يؤثر على سرعة الحركة. إذا كانت مهمتك بسيطة، اكتفِ بالحساسات الأساسية.
+                 <p className="text-xs text-indigo-300/80 mt-1 leading-relaxed">
+                   إضافة الكاميرا أو LiDAR تستهلك طاقة عالية وتزيد وزن الروبوت، مما قد يؤثر على سرعة الحركة. إذا كانت مهمتك بسيطة، اكتفِ بالحساسات الأساسية لتوفير الموارد.
                  </p>
                </div>
             </div>

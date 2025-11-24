@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -135,9 +134,11 @@ export default function App() {
                 {/* Simulation Section */}
                 <div className="flex-1">
                    <SimulationViewport 
+                      config={robotConfig}
                       isRunning={isRunning} 
                       codeOutput={simCommands} 
                       resetSimulation={() => setSimCommands([])}
+                      startPosition={{ x: 100, y: 100, angle: 0 }}
                    />
                 </div>
                 {/* Hardware Status (Simulated) */}
